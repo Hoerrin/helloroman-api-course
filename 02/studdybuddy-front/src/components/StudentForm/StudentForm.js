@@ -15,6 +15,7 @@ import {
   Scores,
   ScoresWrapper
 } from 'components/StudentForm/StudentForm.styles';
+import { api, endpoints } from 'api'
 
 let grade = yup.number();
 grade
@@ -24,22 +25,32 @@ grade
   .max(6, 'Ocena musi być niższa od 7');
 
 const StudentForm = () => {
-  const [scores, setScores] = useState([4,2,3,4,4,3,4]);
+  const [scores, setScores] = useState([]);
   const [scoreInputValue, setScoreInputValue] = useState('');
   const { register, handleSubmit, watch, errors } = useForm();
-  const onSubmit = data => console.log({ ...data, scores });
   const [average, setAverage] = useState();
 
-  useEffect(() => {
-    setScores([4,2,3,4,4,3,4]);
-  }, []);
+  const onSubmit = ({ name, age, group }) => {
+    api.post(endpoints.users, {
+      name,
+      age: parseInt(age, 10),
+      group,
+      grades: scores
+    })
+      .then(response => {
+        console.log(response)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+  };
 
   useEffect(() => {
     setAverage(getGradesAvg(scores));
   }, [scores])
 
   const handleScoreInputChange = (e) => {
-      setScoreInputValue(e.target.value);
+    setScoreInputValue(e.target.value);
   }
 
   const handleAddGrade = () => {
@@ -52,12 +63,12 @@ const StudentForm = () => {
       <Title>Dodaj ucznia</Title>
       <Form onSubmit={handleSubmit(onSubmit)}>
         <Field><Label>Imię</Label>
-          <Input id="name" name="name" ref={register}/></Field>
+          <Input id="name" name="name" ref={register} /></Field>
         <Field><Label>Grupa</Label>
-          <Input id="group" name="group" ref={register}/></Field>
+          <Input id="group" name="group" ref={register} /></Field>
 
         <Field><Label>Wiek</Label>
-          <Input id="age" name="age" ref={register}/></Field>
+          <Input id="age" name="age" ref={register} /></Field>
         <Field><Label>Dodaj ocenę</Label>
           <AddScoreWrapper>
             <Input id="score" name="score" value={scoreInputValue} onChange={handleScoreInputChange} />
